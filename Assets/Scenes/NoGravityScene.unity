@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -168,12 +168,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 36112830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492016999899cf54e9dcaa54221f9409, type: 3}
+  m_Script: {fileID: 11500000, guid: 82c2f551b91c8a54daa5ccbe7178fda3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  translation: {fileID: 4277753812687109676, guid: 62fa6998a8465984f9250b20838da8e6, type: 3}
-  pitchYaw: {fileID: 5782427701089913595, guid: 62fa6998a8465984f9250b20838da8e6, type: 3}
-  roll: {fileID: -7445459332283448595, guid: 62fa6998a8465984f9250b20838da8e6, type: 3}
+  translation: {fileID: 4277753812687109676, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
+  pitchYaw: {fileID: 5782427701089913595, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
+  roll: {fileID: -7445459332283448595, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
   maxSpeed: 2
   acceleration: 10
   deceleration: 100
@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Actions: {fileID: -944628639613478452, guid: 62fa6998a8465984f9250b20838da8e6, type: 3}
+  m_Actions: {fileID: -944628639613478452, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
   m_NotificationBehavior: 0
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
