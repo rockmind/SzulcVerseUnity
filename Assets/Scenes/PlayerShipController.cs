@@ -6,61 +6,62 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerShipController : MonoBehaviour
 {
+    private Rigidbody _rb;
+    private Transform _tr;
 
-    private Rigidbody rb;
-    private Transform tr;
-    
-    [Header("--- Ship movement settings ---")]
-    [SerializeField] private InputActionReference translation, pitchYaw, roll;
-    [SerializeField] private float maxSpeed = 2, acceleration = 10, deacceleration = 100, maxRotationSpeed = 10f;
-    
-    
-    private float currentSpeed = 0;
-    private float currentRollRotation = 0;
-    private float currentPitchYawRotation = 0;
-    private Vector3 currentAngularSpeed = new Vector3(0, 0, 0);
-    
-    private Vector3 oldTranslationInput;
-    private Vector2 oldPitchYawInput;
-    private float oldRollInput;
-    private Vector3 oldAngularSpeed;
-    
-    public Vector3 translationInput { get; set; }
-    public Vector2 pitchYawInput { get; set; }
-    public float rollInput { get; set; }
+    [Header("--- Ship movement settings ---")] [SerializeField]
+    private InputActionReference translation, pitchYaw, roll;
+
+    [SerializeField] private float maxSpeed = 2, acceleration = 10, deceleration = 100;
+    [SerializeField] private float rollSpeed = 100, pitchSpeed = 100, yawSpeed = 100;
+
+
+    private float _currentSpeed = 0;
+
+    private Vector3 _oldTranslationInput;
+    private Vector2 _oldPitchYawInput;
+    private float _oldRollInput;
+    private Vector3 _oldAngularSpeed;
+
+    public Vector3 TranslationInput { get; set; }
+    public Vector2 PitchYawInput { get; set; }
+    public float RollInput { get; set; }
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        tr = GetComponent<Transform>();
+        _rb = GetComponent<Rigidbody>();
+        _tr = GetComponent<Transform>();
     }
-    
+
 
     private void Update()
     {
-        translationInput = translation.action.ReadValue<Vector3>();
-        pitchYawInput = pitchYaw.action.ReadValue<Vector2>();
-        rollInput = roll.action.ReadValue<float>();
+        TranslationInput = translation.action.ReadValue<Vector3>();
+        PitchYawInput = pitchYaw.action.ReadValue<Vector2>();
+        RollInput = roll.action.ReadValue<float>();
     }
-    void FixedUpdate(){
-        var angularInput = new Vector3(pitchYawInput.y, pitchYawInput.x, rollInput);
 
-        if (translationInput.magnitude > 0 && currentSpeed >= 0)
+    private void FixedUpdate()
+    {
+        var angularInput = new Vector3(
+            pitchSpeed * PitchYawInput.y,
+            yawSpeed * PitchYawInput.x,
+            rollSpeed * RollInput
+        );
+
+        if (TranslationInput.magnitude > 0 && _currentSpeed >= 0)
         {
-            oldTranslationInput = rb.rotation * translationInput;
-            currentSpeed += acceleration * maxSpeed * Time.deltaTime;
+            _oldTranslationInput = _rb.rotation * TranslationInput;
+            _currentSpeed += acceleration * maxSpeed * Time.deltaTime;
         }
         else
         {
-            currentSpeed -= deacceleration * maxSpeed * Time.deltaTime;
+            _currentSpeed -= deceleration * maxSpeed * Time.deltaTime;
         }
-        
-        currentSpeed = Mathf.Clamp(currentSpeed, 0, maxSpeed);
-        rb.velocity = oldTranslationInput * currentSpeed;
 
-        rb.transform.Rotate(angularInput);
-        if (angularInput.magnitude > 0)
-        {
-        }
+        _currentSpeed = Mathf.Clamp(_currentSpeed, 0, maxSpeed);
+        _rb.velocity = _oldTranslationInput * _currentSpeed;
+
+        _rb.transform.Rotate(angularInput * Time.deltaTime);
     }
 }
