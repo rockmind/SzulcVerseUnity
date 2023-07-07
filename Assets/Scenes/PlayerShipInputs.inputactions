@@ -167,17 +167,6 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "0018ffc7-6454-4f45-a1bc-371989fab969",
-                    "path": "<Mouse>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "RotationPitchYaw",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
                     "name": "QE",
                     "id": "15b1032c-e27c-4ee9-aa80-9466dbcedbbf",
                     "path": "1DAxis",
