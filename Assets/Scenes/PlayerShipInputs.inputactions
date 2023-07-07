@@ -180,7 +180,7 @@
                 {
                     "name": "negative",
                     "id": "697c3b93-1953-48b2-9001-03d6c59f43fb",
-                    "path": "<Keyboard>/q",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -191,7 +191,7 @@
                 {
                     "name": "positive",
                     "id": "63351c99-5ba4-41c4-ae14-5854bb8fc4aa",
-                    "path": "<Keyboard>/e",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
