@@ -1,5 +1,6 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Portal : MonoBehaviour {
@@ -20,6 +21,8 @@ public class Portal : MonoBehaviour {
     List<PortalTraveller> trackedTravellers;
     MeshFilter screenMeshFilter;
 
+    private Tuple<Portal, Portal> portalPair;
+    
     void Awake () {
         playerCam = Camera.main;
         portalCam = GetComponentInChildren<Camera> ();
@@ -27,6 +30,16 @@ public class Portal : MonoBehaviour {
         trackedTravellers = new List<PortalTraveller> ();
         screenMeshFilter = screen.GetComponent<MeshFilter> ();
         screen.material.SetInt ("displayMask", 1);
+        List<Portal>portalPairList = new List<Portal>(){this, linkedPortal};
+        portalPairList = portalPairList.OrderBy(x => x.name)
+                      .ThenBy( x => x.transform.position.x)
+                      .ThenBy( x => x.transform.position.y)
+                      .ThenBy( x => x.transform.position.z)
+                      .ThenBy( x => x.transform.rotation.x)
+                      .ThenBy( x => x.transform.rotation.y)
+                      .ThenBy( x => x.transform.rotation.z)
+                      .ToList();
+        portalPair = Tuple.Create<Portal, Portal>(portalPairList[0], portalPairList[1]);
     }
 
     void LateUpdate () {
@@ -48,14 +61,14 @@ public class Portal : MonoBehaviour {
                 var positionOld = travellerT.position;
                 var rotOld = travellerT.rotation;
                 traveller.Teleport (transform, linkedPortal.transform, m.GetColumn (3), m.rotation);
-                traveller.graphicsClone.transform.SetPositionAndRotation (positionOld, rotOld);
+                traveller.graphicsClonesMap[portalPair].transform.SetPositionAndRotation (positionOld, rotOld);
                 // Can't rely on OnTriggerEnter/Exit to be called next frame since it depends on when FixedUpdate runs
                 linkedPortal.OnTravellerEnterPortal (traveller);
                 trackedTravellers.RemoveAt (i);
                 i--;
 
             } else {
-                traveller.graphicsClone.transform.SetPositionAndRotation (m.GetColumn (3), m.rotation);
+                traveller.graphicsClonesMap[portalPair].transform.SetPositionAndRotation (m.GetColumn (3), m.rotation);
                 //UpdateSliceParams (traveller);
                 traveller.previousOffsetFromPortal = offsetFromPortal;
             }
@@ -135,42 +148,42 @@ public class Portal : MonoBehaviour {
         foreach (var traveller in trackedTravellers) {
             if (SameSideOfPortal (traveller.transform.position, portalCamPos)) {
                 // Addresses issue 1
-                traveller.SetSliceOffsetDst (hideDst, false);
+                traveller.SetSliceOffsetDst (portalPair, hideDst, false);
             } else {
                 // Addresses issue 2
-                traveller.SetSliceOffsetDst (showDst, false);
+                traveller.SetSliceOffsetDst (portalPair, showDst, false);
             }
 
             // Ensure clone is properly sliced, in case it's visible through this portal:
             int cloneSideOfLinkedPortal = -SideOfPortal (traveller.transform.position);
             bool camSameSideAsClone = linkedPortal.SideOfPortal (portalCamPos) == cloneSideOfLinkedPortal;
             if (camSameSideAsClone) {
-                traveller.SetSliceOffsetDst (screenThickness, true);
+                traveller.SetSliceOffsetDst (portalPair, screenThickness, true);
             } else {
-                traveller.SetSliceOffsetDst (-screenThickness, true);
+                traveller.SetSliceOffsetDst (portalPair, -screenThickness, true);
             }
         }
 
         var offsetFromPortalToCam = portalCamPos - transform.position;
         foreach (var linkedTraveller in linkedPortal.trackedTravellers) {
             var travellerPos = linkedTraveller.graphicsObject.transform.position;
-            var clonePos = linkedTraveller.graphicsClone.transform.position;
+            var clonePos = linkedTraveller.graphicsClonesMap[portalPair].transform.position;
             // Handle clone of linked portal coming through this portal:
             bool cloneOnSameSideAsCam = linkedPortal.SideOfPortal (travellerPos) != SideOfPortal (portalCamPos);
             if (cloneOnSameSideAsCam) {
                 // Addresses issue 1
-                linkedTraveller.SetSliceOffsetDst (hideDst, true);
+                linkedTraveller.SetSliceOffsetDst (portalPair, hideDst, true);
             } else {
                 // Addresses issue 2
-                linkedTraveller.SetSliceOffsetDst (showDst, true);
+                linkedTraveller.SetSliceOffsetDst (portalPair, showDst, true);
             }
 
             // Ensure traveller of linked portal is properly sliced, in case it's visible through this portal:
             bool camSameSideAsTraveller = linkedPortal.SameSideOfPortal (linkedTraveller.transform.position, portalCamPos);
             if (camSameSideAsTraveller) {
-                linkedTraveller.SetSliceOffsetDst (screenThickness, false);
+                linkedTraveller.SetSliceOffsetDst (portalPair, screenThickness, false);
             } else {
-                linkedTraveller.SetSliceOffsetDst (-screenThickness, false);
+                linkedTraveller.SetSliceOffsetDst (portalPair, -screenThickness, false);
             }
         }
     }
@@ -234,14 +247,14 @@ public class Portal : MonoBehaviour {
         }
 
         // Apply parameters
-        for (int i = 0; i < traveller.originalMaterials.Length; i++) {
-            traveller.originalMaterials[i].SetVector ("sliceCentre", slicePos);
-            traveller.originalMaterials[i].SetVector ("sliceNormal", sliceNormal);
-            traveller.originalMaterials[i].SetFloat ("sliceOffsetDst", sliceOffsetDst);
+        for (int i = 0; i < traveller.originalMaterialsMap[portalPair].Length; i++) {
+            traveller.originalMaterialsMap[portalPair][i].SetVector ("sliceCentre", slicePos);
+            traveller.originalMaterialsMap[portalPair][i].SetVector ("sliceNormal", sliceNormal);
+            traveller.originalMaterialsMap[portalPair][i].SetFloat ("sliceOffsetDst", sliceOffsetDst);
 
-            traveller.cloneMaterials[i].SetVector ("sliceCentre", cloneSlicePos);
-            traveller.cloneMaterials[i].SetVector ("sliceNormal", cloneSliceNormal);
-            traveller.cloneMaterials[i].SetFloat ("sliceOffsetDst", cloneSliceOffsetDst);
+            traveller.cloneMaterialsMap[portalPair][i].SetVector ("sliceCentre", cloneSlicePos);
+            traveller.cloneMaterialsMap[portalPair][i].SetVector ("sliceNormal", cloneSliceNormal);
+            traveller.cloneMaterialsMap[portalPair][i].SetFloat ("sliceOffsetDst", cloneSliceOffsetDst);
 
         }
 
@@ -273,7 +286,7 @@ public class Portal : MonoBehaviour {
 
     void OnTravellerEnterPortal (PortalTraveller traveller) {
         if (!trackedTravellers.Contains (traveller)) {
-            traveller.EnterPortalThreshold ();
+            traveller.EnterPortalThreshold (portalPair);
             traveller.previousOffsetFromPortal = traveller.transform.position - transform.position;
             trackedTravellers.Add (traveller);
         }
@@ -289,7 +302,7 @@ public class Portal : MonoBehaviour {
     void OnTriggerExit (Collider other) {
         var traveller = other.GetComponent<PortalTraveller> ();
         if (traveller && trackedTravellers.Contains (traveller)) {
-            traveller.ExitPortalThreshold ();
+            traveller.ExitPortalThreshold (portalPair);
             trackedTravellers.Remove (traveller);
         }
     }

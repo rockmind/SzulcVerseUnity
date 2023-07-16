@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,12 +13,14 @@ public class ShipController : PortalTraveller {
     public float runSpeed = 6;
     public float smoothMoveTime = 0.1f;
     
+    public float walkSpeedRotation = 3;
+    public float runSpeedRotation = 6;
     public float rotationSmoothTime = 0.1f;
 
     private CharacterController _controller;
-    public float roll;
-    public float yaw;
-    public float pitch;
+    private float roll;
+    private float yaw;
+    private float pitch;
     private float _smoothRoll;
     private float _smoothYaw;
     private float _smoothPitch;
@@ -75,7 +75,8 @@ public class ShipController : PortalTraveller {
             Mathf.SmoothDampAngle (_smoothPitch, RollPitchYawInput.y, ref _pitchSmoothV, rotationSmoothTime),
             Mathf.SmoothDampAngle (_smoothYaw, RollPitchYawInput.x, ref _yawSmoothV, rotationSmoothTime)
         );
-        transform.Rotate(angularInput);
+        float currentSpeedRotation = (Input.GetKey (KeyCode.LeftShift)) ? runSpeedRotation : walkSpeedRotation;
+        transform.Rotate(currentSpeedRotation * angularInput);
 
     }
 
