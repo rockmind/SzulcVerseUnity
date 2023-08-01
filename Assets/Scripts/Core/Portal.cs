@@ -7,13 +7,15 @@ public class Portal : MonoBehaviour {
     [Header ("Main Settings")]
     public Portal linkedPortal;
     public MeshRenderer screen;
-    public int recursionLimit = 5;
 
     [Header ("Advanced Settings")]
     public float nearClipOffset = 0.05f;
     public float nearClipLimit = 0.2f;
 
     // Private variables
+
+    private Vector3[] renderPositions;
+    private Quaternion[] renderRotations;
     RenderTexture viewTexture;
     Camera portalCam;
     Camera playerCam;
@@ -42,6 +44,11 @@ public class Portal : MonoBehaviour {
         portalPair = Tuple.Create<Portal, Portal>(portalPairList[0], portalPairList[1]);
     }
 
+    public void CreatePositionTables(int recursionLimit)
+    {
+        renderPositions = new Vector3[recursionLimit];
+        renderRotations = new Quaternion[recursionLimit];
+    }
     void LateUpdate () {
         HandleTravellers ();
     }
@@ -76,16 +83,11 @@ public class Portal : MonoBehaviour {
     }
 
     // Called before any portal cameras are rendered for the current frame
-    public void PrePortalRender () {
+    public void PrePortalRender (int recursionLimit) {
         foreach (var traveller in trackedTravellers) {
             UpdateSliceParams (traveller);
         }
-    }
-
-    // Manually render the camera attached to this portal
-    // Called after PrePortalRender, and before PostPortalRender
-    public void Render () {
-
+        
         // // Skip rendering the view from this portal if player is not looking at the linked portal
         // if (!CameraUtility.VisibleFromCamera (linkedPortal.screen, playerCam)) {
         //     return;
@@ -94,10 +96,7 @@ public class Portal : MonoBehaviour {
         CreateViewTexture ();
 
         var localToWorldMatrix = playerCam.transform.localToWorldMatrix;
-        var renderPositions = new Vector3[recursionLimit];
-        var renderRotations = new Quaternion[recursionLimit];
 
-        int startIndex = 0;
         portalCam.projectionMatrix = playerCam.projectionMatrix;
         for (int i = 0; i < recursionLimit; i++) {
             if (i > 0) {
@@ -112,28 +111,47 @@ public class Portal : MonoBehaviour {
             renderRotations[renderOrderIndex] = localToWorldMatrix.rotation;
 
             portalCam.transform.SetPositionAndRotation (renderPositions[renderOrderIndex], renderRotations[renderOrderIndex]);
-            startIndex = renderOrderIndex;
         }
+    }
+
+    // Manually render the camera attached to this portal
+    // Called after PrePortalRender, and before PostPortalRender
+    public void Render (int recursionStep) {
 
         // Hide screen so that camera can see through portal
         screen.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
-        linkedPortal.screen.material.SetInt ("displayMask", 0);
 
-        for (int i = startIndex; i < recursionLimit; i++) {
-            portalCam.transform.SetPositionAndRotation (renderPositions[i], renderRotations[i]);
-            SetNearClipPlane ();
-            HandleClipping ();
-            portalCam.Render ();
-
-            if (i == startIndex) {
-                linkedPortal.screen.material.SetInt ("displayMask", 1);
-            }
+        portalCam.transform.SetPositionAndRotation(
+            renderPositions[recursionStep],
+            renderRotations[recursionStep]
+        );
+        if (recursionStep == 0)
+        {
+            linkedPortal.screen.material.SetInt("displayMask", 0);
+            SetNearClipPlane();
+            HandleClipping();
+            portalCam.Render();
+            linkedPortal.screen.material.SetInt ("displayMask", 1);
         }
 
+        else {
+            SetNearClipPlane();
+            HandleClipping();
+            portalCam.Render();
+        }
+        
         // Unhide objects hidden at start of render
         screen.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-    }
 
+    }
+    // Called once all portals have been rendered, but before the player camera renders
+    public void PostPortalRender () {
+
+        foreach (var traveller in trackedTravellers) {
+            UpdateSliceParams (traveller);
+        }
+        ProtectScreenFromClipping (playerCam.transform.position);
+    }
     void HandleClipping () {
         // There are two main graphical issues when slicing travellers
         // 1. Tiny sliver of mesh drawn on backside of portal
@@ -188,13 +206,7 @@ public class Portal : MonoBehaviour {
         }
     }
 
-    // Called once all portals have been rendered, but before the player camera renders
-    public void PostPortalRender () {
-        foreach (var traveller in trackedTravellers) {
-            UpdateSliceParams (traveller);
-        }
-        ProtectScreenFromClipping (playerCam.transform.position);
-    }
+
     void CreateViewTexture () {
         if (viewTexture == null || viewTexture.width != Screen.width || viewTexture.height != Screen.height) {
             if (viewTexture != null) {
