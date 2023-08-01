@@ -140,38 +140,39 @@ public class Portal : MonoBehaviour
     // }
     // Manually render the camera attached to this portal
     // Called after PrePortalRender, and before PostPortalRender
-    public int Render(
-        int recursionLimit,
-        int currentRecursion,
+    public Tuple<int,Portal> Render(
+        int recursionStep,
         Matrix4x4 camLocalToWorldMatrix,
         List<Portal> otherPortals,
         Camera virtualCamera 
         )
     {
-        // Skip rendering the view from this portal if player is not looking at the linked portal
-        if (!CameraUtility.VisibleFromCamera(linkedPortal.screen, virtualCamera) || currentRecursion < 0)
+        // // Skip rendering the view from this portal if player is not looking at the linked portal
+        // if (!CameraUtility.VisibleFromCamera(linkedPortal.screen, virtualCamera) || recursionStep < 0)
+        if (recursionStep < 0)
         {
-            return 0;
+            // return 0;
+            return new Tuple<int, Portal>(0, this);
         }
 
-        if (recursionLimit == currentRecursion)
-        {
-            CreateViewTexture();
-        }
+        CreateViewTexture();
 
-        var renderPosition = new Vector3();
-        var renderRotation = new Quaternion();
+        Vector3 renderPosition = new Vector3();
+        Quaternion renderRotation = new Quaternion();
 
-        int previousRecursion = 1;
+        int previousRecursionStep = recursionStep;
+        Portal previousRecursionPortal = this;
         portalCam.projectionMatrix = virtualCamera.projectionMatrix;
 
-        if (currentRecursion > 0)
+        if (recursionStep > 0)
         {
-            camLocalToWorldMatrix = transform.localToWorldMatrix * linkedPortal.transform.worldToLocalMatrix *
-                                    camLocalToWorldMatrix;
-            // foreach (Portal otherPortal in otherPortals)
+            // foreach (Portal otherPortal in otherPortals.FindAll(
+            //              x => CameraUtility.VisibleFromCamera(x.screen, virtualCamera))
+            //          )
             // {
             //     if (
+            //         otherPortal != this 
+            //         || 
             //         !CameraUtility.BoundsOverlap (
             //             screenMeshFilter,
             //             otherPortal.screenMeshFilter,
@@ -180,22 +181,27 @@ public class Portal : MonoBehaviour
             //     {
             //         continue;
             //     }
-            //     otherPortal.Render(
-            //         recursionLimit,
-            //         currentRecursion - 1,
-            //         portalCam.transform.localToWorldMatrix,
+            //     camLocalToWorldMatrix = transform.localToWorldMatrix * otherPortal.transform.worldToLocalMatrix *
+            //                             camLocalToWorldMatrix;
+            //     Tuple<int, Portal> previousRecursionTuple = otherPortal.Render(
+            //         recursionStep - 1,
+            //         camLocalToWorldMatrix,
             //         otherPortals,
             //         portalCam
             //     );
+            //     previousRecursionStep = previousRecursionTuple.Item1;
+            //     previousRecursionPortal = previousRecursionTuple.Item2;
             // }
-            
-            previousRecursion = Render(
-                recursionLimit,
-                currentRecursion - 1,
+            camLocalToWorldMatrix = transform.localToWorldMatrix * linkedPortal.transform.worldToLocalMatrix *
+                                    camLocalToWorldMatrix;
+            Tuple<int, Portal> previousRecursionTuple = Render(
+                recursionStep - 1,
                 camLocalToWorldMatrix,
                 otherPortals,
                 portalCam
                 );
+            previousRecursionStep = previousRecursionTuple.Item1;
+            previousRecursionPortal = previousRecursionTuple.Item2;
         }
 
         renderPosition = camLocalToWorldMatrix.GetColumn(3);
@@ -203,25 +209,30 @@ public class Portal : MonoBehaviour
 
         portalCam.transform.SetPositionAndRotation(renderPosition, renderRotation);
 
-        if (previousRecursion == 0)
+        if (previousRecursionPortal==this && (previousRecursionStep == 0 || recursionStep == 0))
         {
             linkedPortal.screen.material.SetInt("displayMask", 0);
+            RendererPortalCam(virtualCamera);
+            linkedPortal.screen.material.SetInt("displayMask", 1);
+        }
+        else
+        {
+            RendererPortalCam(virtualCamera);
         }
 
+        // return recursionStep;
+        return new Tuple<int, Portal>(recursionStep, this);
+    }
+
+    private void RendererPortalCam(Camera virtualCamera)
+    {
         // Hide screen so that camera can see through portal
         screen.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
         SetNearClipPlane(virtualCamera);
-        HandleClipping ();
+        HandleClipping();
         portalCam.Render();
         // Unhide objects hidden at start of render
         screen.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
-
-        if (previousRecursion == 0)
-        {
-            linkedPortal.screen.material.SetInt("displayMask", 1);
-        }
-
-        return currentRecursion;
     }
 
     void HandleClipping()
@@ -384,7 +395,7 @@ public class Portal : MonoBehaviour
         // Learning resource:
         // http://www.terathon.com/lengyel/Lengyel-Oblique.pdf
         Transform clipPlane = transform;
-        int dot = System.Math.Sign(Vector3.Dot(clipPlane.forward, transform.position - portalCam.transform.position));
+        int dot = Math.Sign(Vector3.Dot(clipPlane.forward, transform.position - portalCam.transform.position));
 
         Vector3 camSpacePos = portalCam.worldToCameraMatrix.MultiplyPoint(clipPlane.position);
         Vector3 camSpaceNormal = portalCam.worldToCameraMatrix.MultiplyVector(clipPlane.forward) * dot;

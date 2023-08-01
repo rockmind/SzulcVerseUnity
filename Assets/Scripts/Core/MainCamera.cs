@@ -23,12 +23,12 @@ public class MainCamera : MonoBehaviour
 
         for (int i = 0; i < portals.Length; i++)
         {
-            List<Portal> otherPortals = portals.ToList().FindAll(x => x!=portals[i] && x!=portals[i].linkedPortal);
+            // List<Portal> otherPortals = portals.ToList().FindAll(x => x!=portals[i] && x!=portals[i].linkedPortal);
+            List<Portal> allPortals = portals.ToList();
             portals[i].Render(
                 recursionLimit,
-                recursionLimit,
                 playerCam.transform.localToWorldMatrix,
-                otherPortals,
+                allPortals,
                 playerCam
             );
             // portals[i].Render (recursionLimit);
