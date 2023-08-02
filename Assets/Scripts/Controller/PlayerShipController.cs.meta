@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e7f706c5de654f2aa159878d221bd8ca
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - graphicsObject: {instanceID: 0}
+  - xYZ: {fileID: 4277753812687109676, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
+  - rollPitchYaw: {fileID: 5297983063114952181, guid: d19570eef269cf545bdfae20d8825d47, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
