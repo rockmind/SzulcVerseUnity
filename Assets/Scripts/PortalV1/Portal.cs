@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Portal : MonoBehaviour
@@ -144,7 +145,7 @@ public class Portal : MonoBehaviour
         int recursionStep,
         Matrix4x4 camLocalToWorldMatrix,
         List<Portal> allPortals,
-        Camera virtualCamera 
+        Camera virtualCamera
         )
     {
 
@@ -170,7 +171,8 @@ public class Portal : MonoBehaviour
         
         // Texture previousTexture = linkedPortal.screen.material.mainTexture;
         // RenderTexture tmpTexture = new RenderTexture(Screen.width, Screen.height, 0);
-
+        Dictionary<Portal, Texture> tmpTextureDict = new Dictionary<Portal, Texture>();
+        
         // // Skip rendering the view from this portal if player is not looking at the linked portal
         // if (!CameraUtility.VisibleFromCamera(linkedPortal.screen, virtualCamera) || recursionStep < 0)
         if (recursionStep <= 0)
@@ -181,6 +183,17 @@ public class Portal : MonoBehaviour
         }
         else
         {
+            foreach (Portal otherPortal in allPortals.FindAll(x=> x!=this))
+            {
+                Texture tmpTexture = otherPortal.screen.material.mainTexture;
+                tmpTextureDict.Add(otherPortal, tmpTexture);
+                Render(
+                    recursionStep - 1,
+                    portalCam.transform.localToWorldMatrix,
+                    allPortals,
+                    portalCam
+                );
+            }
             Render(
                 recursionStep - 1,
                 camLocalToWorldMatrix,
@@ -189,6 +202,12 @@ public class Portal : MonoBehaviour
             );
             
             RendererPortalCam(virtualCamera, camLocalToWorldMatrix);
+            
+            foreach (Portal otherPortal in allPortals.FindAll(x=> x!=this && x!=x.linkedPortal))
+            {
+                otherPortal.screen.material.mainTexture = tmpTextureDict[otherPortal];
+                // tmpTextureDict[otherPortal].Release();
+            }
         }
     }
 
