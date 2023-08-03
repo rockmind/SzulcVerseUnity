@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class ShipController : PortalTraveller {
+public class ShipController : MonoBehaviour {
+    
+    private PortalableObject portalableObject;
 
     public Vector3 XYZInput { get; set; }
     public Vector3 RollPitchYawInput { get; set; }
@@ -36,6 +38,8 @@ public class ShipController : PortalTraveller {
 
     private void Start () {
         _controller = GetComponent<CharacterController> ();
+        portalableObject = GetComponent<PortalableObject>();
+        portalableObject.HasTeleported += PortalableObjectOnHasTeleported;
 
         var eulerAngles = transform.eulerAngles;
         roll = eulerAngles.x;
@@ -45,7 +49,17 @@ public class ShipController : PortalTraveller {
         _smoothYaw = yaw;
         _smoothPitch = pitch;
     }
-
+    private void PortalableObjectOnHasTeleported(Portal sender, Portal destination, Vector3 newposition, Quaternion newrotation)
+    {
+        // For character controller to update
+        
+        Physics.SyncTransforms();
+    }
+    private void OnDestroy()
+    {
+        portalableObject.HasTeleported -= PortalableObjectOnHasTeleported;
+    }
+    
     private void Update () {
     
         XYZInput = xYZ.action.ReadValue<Vector3>();
@@ -79,17 +93,4 @@ public class ShipController : PortalTraveller {
         transform.Rotate(currentSpeedRotation * angularInput);
 
     }
-
-    public override void Teleport (Transform fromPortal, Transform toPortal, Vector3 pos, Quaternion rot) {
-        transform.position = pos;
-        // Vector3 eulerRot = rot.eulerAngles;
-        // float delta = Mathf.DeltaAngle (_smoothYaw, eulerRot.y);
-        // yaw += delta;
-        // _smoothYaw += delta;
-        // transform.eulerAngles = Vector3.up * _smoothYaw;
-        transform.rotation = rot;
-        _velocity = toPortal.TransformVector (fromPortal.InverseTransformVector (_velocity));
-        Physics.SyncTransforms ();
-    }
-
 }
