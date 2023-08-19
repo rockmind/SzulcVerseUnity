@@ -41,7 +41,7 @@ public class PortalRenderer : MonoBehaviour
             {
                 if (!portal.ShouldRender(cameraPlanes)) continue;
                 
-                portal.RenderViewthroughRecursive(
+                portal.RenderViewThroughRecursive(
                     mainCamera.transform.position,
                     mainCamera.transform.rotation,
                     out _,

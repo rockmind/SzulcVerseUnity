@@ -235,7 +235,7 @@ public class Portal : MonoBehaviour
         return true;
     }
 
-    public void RenderViewthroughRecursive(
+    public void RenderViewThroughRecursive(
         Vector3 refPosition,
         Quaternion refRotation,
         out RenderTexturePool.PoolItem temporaryPoolItem,
@@ -293,7 +293,7 @@ public class Portal : MonoBehaviour
             {
                 if (!visiblePortal.ShouldRender(cameraPlanes)) continue;
                 
-                visiblePortal.RenderViewthroughRecursive(
+                visiblePortal.RenderViewThroughRecursive(
                     virtualPosition,
                     virtualRotation,
                     out var visiblePortalTemporaryPoolItem,
