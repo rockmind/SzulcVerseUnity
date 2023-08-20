@@ -137,104 +137,6 @@ public class Portal : MonoBehaviour
         }
     }
     
-    public static bool RaycastRecursive(
-        Vector3 position,
-        Vector3 direction,
-        int maxRecursions,
-        Action<int> customBeforeRaycast,
-        Func<Portal, int, LayerMask> layerMaskSelector,
-        out RaycastHit hitInfo)
-    {
-        return RaycastRecursiveInternal(position,
-            direction,
-            maxRecursions,
-            customBeforeRaycast,
-            layerMaskSelector,
-            out hitInfo,
-            0,
-            null,
-            null);
-    }
-
-    private static bool RaycastRecursiveInternal(
-        Vector3 position,
-        Vector3 direction,
-        int maxRecursions,
-        Action<int> customBeforeRaycast,
-        Func<Portal, int, LayerMask> layerMaskSelector,
-        out RaycastHit hitInfo,
-        int currentRecursion,
-        GameObject ignoreObject,
-        Portal lastTraversedPortal)
-    {
-        // Ignore a specific object when raycasting.
-        // Useful for preventing a raycast through a portal from hitting the target portal from the back,
-        // which makes a raycast unable to go through a portal since it'll just be absorbed by the target portal's trigger.
-
-        var ignoreObjectOriginalLayer = 0;
-        if (ignoreObject)
-        {
-            ignoreObjectOriginalLayer = ignoreObject.layer;
-            ignoreObject.layer = 2; // Ignore raycast
-        }
-        
-        // Custom before raycast
-        
-        customBeforeRaycast?.Invoke(currentRecursion);
-
-        // Shoot raycast
-
-        var raycastHitSomething = Physics.Raycast(
-            position,
-            direction,
-            out var hit,
-            Mathf.Infinity,
-            layerMaskSelector(lastTraversedPortal, currentRecursion));
-
-        // Reset ignore
-
-        if (ignoreObject)
-            ignoreObject.layer = ignoreObjectOriginalLayer;
-
-        // If no objects are hit, the recursion ends here, with no effect
-
-        if (!raycastHitSomething)
-        {
-            hitInfo = new RaycastHit(); // Dummy
-            return false;
-        }
-        
-        // If the object hit is a portal, recurse, unless we are already at max recursions
-
-        var portal = hit.collider.GetComponent<Portal>();
-        if (portal)
-        {
-            if (currentRecursion >= maxRecursions)
-            {
-                hitInfo = new RaycastHit(); // Dummy
-                return false;
-            }
-
-            // Continue going down the rabbit hole...
-
-            return RaycastRecursiveInternal(
-                TransformPositionBetweenPortals(portal, portal.targetPortal, hit.point),
-                TransformDirectionBetweenPortals(portal, portal.targetPortal, direction),
-                maxRecursions,
-                customBeforeRaycast,
-                layerMaskSelector,
-                out hitInfo,
-                currentRecursion + 1,
-                portal.targetPortal.gameObject,
-                portal);
-        }
-
-        // If the object hit is not a portal, then congrats! We stop here and report back that we hit something.
-        
-        hitInfo = hit;
-        return true;
-    }
-
     public void RenderViewThroughRecursive(
         Vector3 refPosition,
         Quaternion refRotation,
@@ -320,7 +222,7 @@ public class Portal : MonoBehaviour
         {
             foreach (var visiblePortal in targetPortal.visiblePortals)
             {
-                visiblePortal.ShowViewthroughDefaultTexture(out var visiblePortalOriginalTexture);
+                visiblePortal.ShowViewThroughDefaultTexture(out var visiblePortalOriginalTexture);
 
                 visiblePortalResourcesList.Add(new VisiblePortalResources()
                 {
@@ -374,7 +276,7 @@ public class Portal : MonoBehaviour
         viewthroughMaterial.mainTexture = temporaryPoolItem.Texture;
     }
 
-    private void ShowViewthroughDefaultTexture(out Texture originalTexture)
+    private void ShowViewThroughDefaultTexture(out Texture originalTexture)
     {
         originalTexture = viewthroughMaterial.mainTexture;
         viewthroughMaterial.mainTexture = viewthroughDefaultTexture;

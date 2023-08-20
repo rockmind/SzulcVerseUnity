@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using Toggle = UnityEngine.UI.Toggle;
 
 public class MenuManager : MonoBehaviour
@@ -14,9 +11,9 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private TMP_InputField inputRecursionLimit;
     public static int RecursionLimit = 3;
     [SerializeField] private Toggle toggleTorus;
-    public static bool Torus;
+    public static bool Torus = true;
     [SerializeField] private Toggle toggleKleinBottle;
-    public static bool KleinBottle;
+    public static bool KleinBottle = false;
     [SerializeField] private Toggle toggleLandscape1;
     [SerializeField] private Toggle toggleLandscape2;
     [SerializeField] private Toggle toggleLandscape3;
