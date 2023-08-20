@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class ShipController : MonoBehaviour {
     
@@ -91,6 +92,11 @@ public class ShipController : MonoBehaviour {
         );
         float currentSpeedRotation = (Input.GetKey (KeyCode.LeftShift)) ? runSpeedRotation : walkSpeedRotation;
         transform.Rotate(currentSpeedRotation * angularInput);
+        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene("Menu");
+        }
 
     }
 }

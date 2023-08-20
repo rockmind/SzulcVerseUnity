@@ -4825,7 +4825,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 238b1f65910f52c408c7d5ccf7848ead, type: 2}
+  - {fileID: 2100000, guid: bbbe621867ac5514a820702be391ba95, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9776,7 +9776,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 238b1f65910f52c408c7d5ccf7848ead, type: 2}
+  - {fileID: 2100000, guid: bbbe621867ac5514a820702be391ba95, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -10461,13 +10461,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2056651576}
+  - component: {fileID: 2056651577}
   m_Layer: 0
   m_Name: Frame
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2056651576
 Transform:
   m_ObjectHideFlags: 0
@@ -10495,6 +10496,19 @@ Transform:
   - {fileID: 1357601349}
   m_Father: {fileID: 1218745617}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2056651577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2056651575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbd2148c69234b2439a828ad0c6bf11d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frames: {fileID: 2056651575}
 --- !u!1 &2071743640
 GameObject:
   m_ObjectHideFlags: 0
@@ -10955,7 +10969,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   portalCamera: {fileID: 366331170}
-  maxRecursions: 4
   debugTotalRenderCount: 0
   noCloneMask:
     serializedVersion: 2

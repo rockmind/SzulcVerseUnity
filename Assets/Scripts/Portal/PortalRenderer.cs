@@ -3,7 +3,7 @@
 public class PortalRenderer : MonoBehaviour
 {
     public Camera portalCamera;
-    public int maxRecursions = 2;
+    private int maxRecursions = MenuManager.RecursionLimit;
     
     public int debugTotalRenderCount;
 
