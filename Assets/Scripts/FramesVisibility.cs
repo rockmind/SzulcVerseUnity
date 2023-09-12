@@ -7,6 +7,6 @@ public class FramesVisibility : MonoBehaviour
     public GameObject frames;
     void Start()
     {
-        frames.SetActive(MenuManager.Frames);
+        frames.SetActive(MenuManager.FramesIsOn);
     }
 }
