@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Portal : MonoBehaviour
@@ -68,6 +69,16 @@ public class Portal : MonoBehaviour
 
         plane = new Plane(normalVisible.forward, transform.position);
         vectorPlane = new Vector4(plane.normal.x, plane.normal.y, plane.normal.z, plane.distance);
+
+        if (MenuManager.SimpleLandscapeIsOn || MenuManager.VillageLandscapeIsOn)
+        {
+            viewthroughDefaultTexture = Resources.Load("WallBcg") as Texture;
+        }
+
+        if (MenuManager.DungeonsLandscapeIsOn || MenuManager.SpaceLandscapeIsOn)
+        {
+            viewthroughDefaultTexture = Resources.Load("WallColour") as Texture;
+        }
 
         StartCoroutine(WaitForFixedUpdateLoop());
     }
